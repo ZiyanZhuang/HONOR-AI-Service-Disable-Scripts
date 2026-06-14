@@ -1,39 +1,89 @@
-# HONOR AI Service Disable Scripts (HnPCAIService Blocker) 🚫
+# HONOR AI Blocker
 
-一个轻量级的批处理脚本，用于停止、禁用和清理 Windows 系统上的 **HONOR AI 服务程序 (HnPCAIService.exe)**。
+PowerShell scripts for disabling selected HONOR Magic AI / PC AI background components on Windows.
 
-## ✨ 核心功能
+This project is intended for users who see HONOR AI services repeatedly starting, locking files under `C:\ProgramData\Comms`, producing large logs or crash dumps, or consuming disk space after the AI features are not wanted.
 
-* **进程管理**: 自动结束 HnPCAIService 相关进程。
-* **服务控制**: 停止并禁用 Windows 服务 `HNPCAIService`。
-* **启动项清理**: 移除注册表中的自动启动项。
-* **任务调度**: 禁用和删除相关的计划任务。
-* **状态验证**: 检查禁用操作是否成功。
+## What It Does
 
-## 📥 如何快速使用 (推荐)
+`ban_honor_ai.ps1`:
 
-右键管理员运行.bat文件即可
+- stops and disables known HONOR AI services
+- terminates known HONOR AI processes
+- adds Image File Execution Options blocks for known HONOR AI executables
+- disables matching scheduled tasks
+- removes known AI cache/data directories under `C:\ProgramData\Comms`
 
+`unban_honor_ai.ps1`:
 
-或者参考如下
-### 方法 1: 使用修复版批处理脚本 (.bat)
+- removes the Image File Execution Options blocks
+- restores the known HONOR AI services to automatic startup
 
-这是最简单、兼容性最好的方法。
+Legacy scripts from the original repository are kept for compatibility:
 
-1.  右键点击 `disable_honor_ai_service_fixed.bat` 文件。
-2.  选择 **"以管理员身份运行" (Run as administrator)**。
-3.  等待脚本执行完成。
+- `disable_honor_ai_service_fixed.bat`
+- `disable_honor_ai_service_from_bat.ps1`
 
-### 方法 2: 使用 PowerShell 脚本 (.ps1)
+## Targeted Components
 
-提供更多高级功能，如强制模式和重新启用。
+Services:
+
+- `HnPCAIService`
+- `HnPCInferEngine`
+- `MagicAnimationService`
+
+Processes / executables:
+
+- `AISearchUI.exe`
+- `AISupportCenter.exe`
+- `MagicText.exe`
+- `MagicTextHelper.exe`
+- `HNPCInferEngineService.exe`
+- `HNPCInferServer.exe`
+- `HNPCLLMServer.exe`
+- `HnPCAIService.exe`
+- `MagicAnimationService.exe`
+
+Data/cache paths:
+
+- `C:\ProgramData\Comms\MagicAI`
+- `C:\ProgramData\Comms\HNPCAIService`
+- `C:\ProgramData\Comms\HNPCInferServer`
+- `C:\ProgramData\Comms\HNModelCache`
+- `C:\ProgramData\Comms\MagicAnimation`
+- `C:\ProgramData\Comms\HNPCInferEngine`
+- `C:\ProgramData\Comms\HNModels`
+- `C:\ProgramData\Comms\DownloadModelCache`
+- `C:\ProgramData\Comms\modelmarket`
+- `C:\ProgramData\Comms\HnAgentStudio`
+- `C:\ProgramData\Comms\MagicClaw`
+
+The script is intentionally scoped to AI-related names. It does not intentionally disable HONOR update, device collaboration, display, performance, or PC Manager base services.
+
+## Usage
+
+Open PowerShell as Administrator:
 
 ```powershell
-# 1. 如果被阻止，先运行以下命令解除限制：
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+Set-ExecutionPolicy -Scope Process Bypass -Force
+.\ban_honor_ai.ps1
+```
 
-# 2. 运行禁用脚本：
-.\disable_honor_ai_service.ps1
+To undo the startup blocks and service startup changes:
 
-# 重新启用服务：
-.\disable_honor_ai_service.ps1 -Enable
+```powershell
+Set-ExecutionPolicy -Scope Process Bypass -Force
+.\unban_honor_ai.ps1
+```
+
+## Notes
+
+- Run from an elevated PowerShell window.
+- The block mechanism uses Windows Image File Execution Options and points blocked executables to `C:\Windows\System32\systray.exe`.
+- Some files may still require a reboot before they can be deleted if a protected service keeps handles open.
+- HONOR software updates may recreate services, files, or scheduled tasks. Re-run the script after updates if needed.
+
+## Disclaimer
+
+Use at your own risk. This script changes service startup configuration, scheduled tasks, registry keys, running processes, and application data. Review the script before running it.
+
